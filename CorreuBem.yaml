@@ -1,0 +1,166 @@
+---
+env:
+  contexts:
+  - name: "dvwa"
+    urls:
+    - http://10.0.2.4/DVWA
+    includePaths:
+    - http://10.0.2.4/DVWA.*
+    excludePaths:
+    authentication:
+      method: "browser"
+      parameters:
+        loginPageUrl: http://10.0.2.4/DVWA/login.php
+        loginPageWait: 5
+        browserId: "firefox-headless"
+      verification:
+        method: "autodetect"
+        loggedInRegex: 
+        loggedOutRegex: 
+        pollFrequency: 
+        pollUnits: 
+        pollUrl: 
+        pollPostData: ""
+    sessionManagement:
+      method: autodetect
+      parameters: {}
+    technology:
+      exclude: []
+    users:
+    - name: admin
+      credentials:
+        password: password
+        username: admin
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+  vars: {}
+jobs:
+- parameters:
+    scanOnlyInScope: true
+    enableTags: false
+    disableAllRules: false
+  rules: []
+  name: "passiveScan-config"
+  type: "passiveScan-config"
+- parameters:
+    user: "admin"
+  requests:
+  - url: http://10.0.2.4/DVWA/index.php
+    name: ""
+    method: ""
+    httpVersion: ""
+    headers: []
+    data: ""
+  name: "requestor"
+  type: "requestor"
+- parameters:
+    context: "dvwa"
+    user: admin
+    url: ""
+    maxDuration: 10
+    maxDepth: 0
+    maxChildren: 0
+    acceptCookies: false
+    handleODataParametersVisited: false
+    handleParameters: "IGNORE_COMPLETELY"
+    maxParseSizeBytes: 0
+    parseComments: false
+    parseGit: false
+    parseRobotsTxt: false
+    parseSitemapXml: false
+    parseSVNEntries: false
+    postForm: false
+    processForm: false
+    requestWaitTime: 0
+    sendRefererHeader: false
+    userAgent: ""
+  name: "spider"
+  type: "spider"
+  tests:
+  - onFail: "INFO"
+    statistic: "automation.spider.urls.added"
+    site: ""
+    operator: ">="
+    value: 100
+    name: "At least 100 URLs found"
+    type: "stats"
+- parameters:
+    context: "dvwa"
+    user: admin
+    url: ""
+    maxDuration: 120
+    maxCrawlDepth: 10
+    numberOfBrowsers: 8
+    inScopeOnly: true
+    runOnlyIfModern: false
+  name: "spiderAjax"
+  type: "spiderAjax"
+  tests:
+  - onFail: "INFO"
+    statistic: "spiderAjax.urls.added"
+    site: ""
+    operator: ">="
+    value: 100
+    name: "At least 100 URLs found"
+    type: "stats"
+- parameters:
+    time: "1"
+    fileName: ""
+  name: "delay"
+  type: "delay"
+- parameters:
+    maxDuration: 0
+  name: "passiveScan-wait"
+  type: "passiveScan-wait"
+- parameters:
+    context: "dvwa"
+    user: admin
+    policy: ""
+    maxRuleDurationInMins: 10
+    maxScanDurationInMins: 
+    maxAlertsPerRule: 10
+  policyDefinition:
+    defaultStrength: "medium"
+    defaultThreshold: "medium"
+    rules: []
+  name: "eScan"
+  type: "activeScan"
+- parameters:
+    template: "risk-confidence-html"
+    theme: "original"
+    reportDir: "/home/vboxuser/zaproxy"
+    reportFile: "dvwa-AuthTesterContext"
+    reportTitle: "ZAP Scanning Report"
+    reportDescription: ""
+    displayReport: false
+  risks:
+  - "low"
+  - "medium"
+  - "high"
+  confidences:
+  - "low"
+  - "medium"
+  - "high"
+  - "confirmed"
+  sections:
+  - "siteRiskCounts"
+  - "responseBody"
+  - "appendix"
+  - "alertTypes"
+  - "responseHeader"
+  - "alertTypeCounts"
+  - "riskConfidenceCounts"
+  - "alerts"
+  - "aboutThisReport"
+  - "contents"
+  - "requestBody"
+  - "reportDescription"
+  - "reportParameters"
+  - "requestHeader"
+  - "summaries"
+  sites: []
+  name: "report"
+  type: "report"
+
