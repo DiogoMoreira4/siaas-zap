@@ -21,3 +21,24 @@
 2024-06-27 17:13:54,034 - INFO - Enviei um request para a API com os resultados do acuart1!!!!!
 2024-06-27 17:13:54,035 - INFO - Parei a instancia zap da porta 8091
 2024-06-27 17:13:54,035 - INFO - Todos os targets foram analisados. Finalizando o serviço.
+2024-07-03 12:23:23,559 - INFO - Starting the ZAP service...
+2024-07-03 12:23:23,559 - INFO - Targets to scan: {'Acuforum1': {'name': 'acuforum1', 'url': 'http://testasp.vulnweb.com', 'has_auth': False}, 'Acuart1': {'name': 'acuart1', 'url': 'http://testphp.vulnweb.com', 'has_auth': False}}
+2024-07-03 12:23:23,562 - INFO - Instance 0 created to scan acuforum1
+2024-07-03 12:30:36,056 - INFO - Starting the ZAP service...
+2024-07-03 12:30:36,056 - INFO - Targets to scan: {'Acuforum1': {'name': 'acuforum1', 'url': 'http://testasp.vulnweb.com', 'has_auth': False}, 'Acuart1': {'name': 'acuart1', 'url': 'http://testphp.vulnweb.com', 'has_auth': False}}
+2024-07-03 12:30:36,058 - INFO - Instance 0 created to scan acuforum1
+2024-07-03 12:30:42,150 - INFO - Connected to the instance 0
+2024-07-03 12:30:42,199 - INFO - Automation Plan modified and ready!
+2024-07-03 12:30:43,244 - INFO - Active Scan to acuforum1 in progress: does_not_exist%
+2024-07-03 12:32:46,481 - INFO - Starting the ZAP service...
+2024-07-03 12:32:46,482 - INFO - Targets to scan: {'Acuforum1': {'name': 'acuforum1', 'url': 'http://testasp.vulnweb.com', 'has_auth': False}, 'Acuart1': {'name': 'acuart1', 'url': 'http://testphp.vulnweb.com', 'has_auth': False}}
+2024-07-03 12:32:46,484 - INFO - Instance 0 created to scan acuforum1
+2024-07-03 12:32:52,560 - INFO - Connected to the instance 0
+2024-07-03 12:32:52,586 - INFO - Automation Plan modified and ready!
+2024-07-03 12:32:53,547 - INFO - Active Scan to acuforum1 in progress: does_not_exist%
+2024-07-03 12:36:31,544 - INFO - Starting the ZAP service...
+2024-07-03 12:36:31,544 - INFO - Targets to scan: {'Acuforum1': {'name': 'acuforum1', 'url': 'http://testasp.vulnweb.com', 'has_auth': False}, 'Acuart1': {'name': 'acuart1', 'url': 'http://testphp.vulnweb.com', 'has_auth': False}}
+2024-07-03 12:36:31,546 - INFO - Instance 0 created to scan acuforum1
+2024-07-03 12:36:37,627 - INFO - Connected to the instance 0
+2024-07-03 12:36:37,649 - INFO - Automation Plan modified and ready!
+2024-07-03 12:36:38,811 - INFO - Crawling the target acuforum1...

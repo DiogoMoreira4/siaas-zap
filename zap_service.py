@@ -37,12 +37,15 @@ def read_targets(file_path):
 
 
 def start_zap_instance(port, directory):
+    user = os.getlogin()
+    homedir = os.path.expanduser("~")
+    
     if not os.path.exists(directory):
         os.makedirs(directory)
         # Set ownership and permissions
-        shutil.chown(directory, user='vboxuser', group='vboxuser')
+        shutil.chown(directory, user=user, group=user)
         os.chmod(directory, 0o755)
-    command = f"/home/vboxuser/zaproxy/zap.sh -daemon -port {port} -dir {directory} -config api.key=123456789"
+    command = f"{homedir}/zaproxy/zap.sh -daemon -port {port} -dir {directory} -config api.key=123456789"
     process = subprocess.Popen(command.split())
     return process
 
@@ -124,6 +127,15 @@ def wait_for_zap_start(port, timeout=180):
 def is_scan_complete(zap):
     progress = zap.automation.plan_progress(0)
     return progress['finished'] != ""
+    
+    
+def get_scan_progress(zap, target):
+        
+    if zap.ascan.status(0) == "does_not_exist":    
+        logging.info(f"Crawling the target {target}...")
+    else:
+        progress = zap.ascan.status(0)   
+        logging.info(f"Active Scan to {target} in progress: {progress}%")
 
 
 def collect_results(zap, context_name):
@@ -138,9 +150,6 @@ def collect_results(zap, context_name):
     }
     return results
 
-#def save_to_mongodb(results, db):
-#    collection = db["zap_results"]
-#    collection.insert_one(results)
 
 class ZAPManager:
     def __init__(self, targets_file):
@@ -156,8 +165,6 @@ class ZAPManager:
         self.api_ssl_ca_bundle = read_config(config_file, 'APIconfig', 'api_ssl_ca_bundle')
         self.targets = read_targets(targets_file)
         self.zap_instances = {}
-        #self.collection = siaas_aux.connect_mongodb_collection(self.mongo_user, self.mongo_password, self.mongo_host, self.mongo_db, self.mongo_collection)
-        
         self.current_target = None
         self._create_pid_file()
 
@@ -176,7 +183,7 @@ class ZAPManager:
             os.remove(self.pid_file)
 
     def start_instances(self):
-        logging.info(f"Targets para analisar: {self.targets}")
+        logging.info(f"Targets to scan: {self.targets}")
         try:
             target_keys = list(self.targets.keys())
             for idx, target_key in enumerate(target_keys):
@@ -186,20 +193,21 @@ class ZAPManager:
                 directory = f"{self.base_dir}{idx}"
                 process = start_zap_instance(port, directory)
                 self.zap_instances[target['name']] = {"port": port, "directory": directory}
-                logging.info(f"Criei a instancia {idx}")
+                logging.info(f"Instance {idx} created to scan {target['name']}")
           
                 
                 # Start the scan
                 zap = wait_for_zap_start(port)
-                logging.info(f"Conectei-me a instancia {idx}")
+                logging.info(f"Connected to the instance {idx}")
                 plan_path = f"{directory}/automation_plan.yaml"
-                modify_automation_plan("/home/vboxuser/Desktop/siaas-zap/CorreuBem.yaml","/home/vboxuser/Desktop/siaas-zap/PlanWithoutAuth.yaml" ,plan_path, target)
-                logging.info("Modifiquei o plano de automacao")
+                pathtoplans = os.path.dirname(os.path.abspath(__file__))
+                modify_automation_plan(f"{pathtoplans}/CorreuBem.yaml",f"{pathtoplans}/PlanWithoutAuth.yaml" ,plan_path, target)
+                logging.info("Automation Plan modified and ready!")
                 session_name = f"session_{target['name']}_{port}"
                 run_scan(zap, plan_path, session_name)
                 
                 while not is_scan_complete(zap):
-                    logging.info(f"Esperando a conclusão do scan do target {target['name']}...")
+                    get_scan_progress(zap, target['name'])
                     time.sleep(300)  # Aguarde 10 minutos antes de verificar novamente
                 
                 results = collect_results(zap, target['name'])
@@ -207,13 +215,13 @@ class ZAPManager:
                 #siaas_aux.insert_in_mongodb_collection(self.collection, results)
                 siaas_aux.post_request_to_server(self.api_uri+"/siaas-server/siaas-zap/results", results, ignore_ssl=True, ca_bundle=self.api_ssl_ca_bundle, api_user=self.api_user, api_pwd=self.api_password)
                 logging.info(f"Enviei um request para a API com os resultados do {target['name']}!!!!!")
+                logging.info(f"Https Request with scan results of {target['name']} sent to the server API!")
                 del self.zap_instances[target['name']]
                 os.kill(process.pid, signal.SIGTERM)
-                logging.info(f"Parei a instancia zap da porta {port}")
+                logging.info(f"Instance from port {port} stopped!")
                 
             # Se não houver mais targets, finalize o serviço
-            logging.info("Todos os targets foram analisados. Finalizando o serviço.")
-            print("Todos os targets foram analisados. Finalizando o serviço.")
+            logging.info("All targets were scanned. Finishing the service.")
             self.stop_service()
         finally:
             self._remove_pid_file()
@@ -222,23 +230,7 @@ class ZAPManager:
         with open(self.pid_file, 'r') as f:
             pid = int(f.read().strip())
         os.kill(pid, 15)  # Envia o sinal TERM para o processo
-
-    def get_scan_progress(self):
-        if not self.current_target:
-            return "Nenhum scan em andamento"
-        
-        target = self.current_target
-        instance = self.zap_instances.get(target['name'])
-        if not instance:
-            return f"Alvo {target['name']} não encontrado"
-
-        port = instance['port']
-        zap = ZAPv2(apikey='123456789', proxies={'http': f'http://localhost:{port}', 'https': f'http://localhost:{port}'})
-        progress = zap.automation.plan_progress(0)
-        if progress['finished']:
-            return f"Scan para {target['name']} concluído"
-        else:
-            return f"Scan para {target['name']} em andamento: {progress['progress']}% concluído"
+        logging.info("All ZAP instances stopped and results collected")
 
 
 
@@ -250,8 +242,8 @@ def cli():
 @click.option('--targets-file', required=True, help='Path to the targets file')
 def start(targets_file):
     manager = ZAPManager(targets_file)
+    logging.info("Starting the ZAP service...")
     manager.start_instances()
-    logging.info("ZAP instances started")
 
 @click.command()
 def stop():
@@ -260,17 +252,9 @@ def stop():
     os.kill(pid, 15)  # Envia o sinal TERM para o processo
     logging.info("All ZAP instances stopped and results collected")
 
-@click.command()
-@click.option('--targets-file', required=True, help='Path to the targets file')
-def status(targets_file):
-    manager = ZAPManager(targets_file)  # Dummy initialization to access methods
-    progress = manager.get_scan_progress()
-    print(progress)
-    logging.info(progress)
 
 cli.add_command(start)
 cli.add_command(stop)
-cli.add_command(status)
 
 if __name__ == "__main__":
     cli()
