@@ -14,6 +14,10 @@ import siaas_aux
 
 logging.basicConfig(filename='zap_manager.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+USER = os.getenv("USER") or os.getenv("LOGNAME")
+HOME_DIR = os.path.expanduser("~")
+SIAAS_ZAP_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def read_config(file_path, section, field):
     config = configparser.ConfigParser(interpolation=None)
     config.read(file_path)
@@ -37,15 +41,13 @@ def read_targets(file_path):
 
 
 def start_zap_instance(port, directory):
-    user = os.getlogin()
-    homedir = os.path.expanduser("~")
     
     if not os.path.exists(directory):
         os.makedirs(directory)
         # Set ownership and permissions
-        shutil.chown(directory, user=user, group=user)
+        shutil.chown(directory, user=USER, group=USER)
         os.chmod(directory, 0o755)
-    command = f"{homedir}/zaproxy/zap.sh -daemon -port {port} -dir {directory} -config api.key=123456789"
+    command = f"{HOME_DIR}/zaproxy/ZAP_2.15.0/zap.sh -daemon -port {port} -dir {directory} -config api.key=123456789"
     process = subprocess.Popen(command.split())
     return process
 
@@ -86,6 +88,7 @@ def modify_automation_plan(template_with_auth_path, template_without_auth_path, 
             dados_yaml['jobs'][6]['parameters']['user'] = target['username']
             #report
             dados_yaml['jobs'][7]['parameters']['reportFile'] = target['name']
+            dados_yaml['jobs'][7]['parameters']['reportDir'] =  SIAAS_ZAP_DIR+"/reports"  
         
     else:
         if 'env' in dados_yaml and 'contexts' in dados_yaml['env']:
@@ -103,6 +106,7 @@ def modify_automation_plan(template_with_auth_path, template_without_auth_path, 
             dados_yaml['jobs'][4]['parameters']['context'] = target['name']
             #report
             dados_yaml['jobs'][5]['parameters']['reportFile'] = target['name'] + "_without_auth"  
+            dados_yaml['jobs'][5]['parameters']['reportDir'] =  SIAAS_ZAP_DIR+"/reports"  
                 
     with open(output_path, 'w') as file:
         yaml.safe_dump(dados_yaml, file)
