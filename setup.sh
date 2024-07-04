@@ -4,7 +4,29 @@
 sudo apt-get update
 sudo apt-get install -y python3 python3-pip openjdk-17-jdk
 
+#Instalar o ZAP
+INSTALL_ZAP_SCRIPT="./zap_installation.sh"
+
+if [ -f "$INSTALL_ZAP_SCRIPT" ]; then
+    echo "Installing ZAP..."
+    
+    chmod +x "$INSTALL_ZAP_SCRIPT"
+    
+    "$INSTALL_ZAP_SCRIPT"
+    
+    if [ $? -eq 0 ]; then
+        echo "Installation finished"
+    else
+        echo "Installation failed"
+        exit 1
+    fi
+else
+    echo "Script to install ZAP not found"
+    exit 1
+fi
+
 # Instalar dependências do Python
+echo "Installing requirements..."
 pip3 install -r requirements.txt
 
 # Criar o arquivo de unidade systemd
@@ -28,7 +50,5 @@ EOL
 
 # Recargar o systemd e iniciar o serviço
 sudo systemctl daemon-reload
-sudo systemctl start zap_manager.service
-sudo systemctl enable zap_manager.service
 
 echo "Setup completed successfully."

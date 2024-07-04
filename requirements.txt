@@ -3,4 +3,5 @@ click==8.1.3
 psutil==5.9.5
 requests==2.32.3
 scapy==2.5.0
+testresources==2.0.0
 zaproxy==0.3.1

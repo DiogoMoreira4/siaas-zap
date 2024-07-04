@@ -160,7 +160,7 @@ class ZAPManager:
         config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'conf', 'config.ini')
         self.targets_file = targets_file
         self.base_port = read_config(config_file, 'ZAPConfig', 'base_port')
-        self.base_dir = read_config(config_file, 'ZAPConfig', 'base_dir')
+        self.base_dir = "/home/siaas-test/siaas-zap/instances/instance"
         self.pid_file = read_config(config_file, 'ZAPConfig', 'pid_file')
         self.api_uri = read_config(config_file, 'APIconfig', 'api_uri')
         self.api_user = read_config(config_file, 'APIconfig', 'api_user')
@@ -205,7 +205,7 @@ class ZAPManager:
                 logging.info(f"Connected to the instance {idx}")
                 plan_path = f"{directory}/automation_plan.yaml"
                 pathtoplans = os.path.dirname(os.path.abspath(__file__))
-                modify_automation_plan(f"{pathtoplans}/CorreuBem.yaml",f"{pathtoplans}/PlanWithoutAuth.yaml" ,plan_path, target)
+                modify_automation_plan(f"{pathtoplans}/PlanWithAuth.yaml",f"{pathtoplans}/PlanWithoutAuth.yaml" ,plan_path, target)
                 logging.info("Automation Plan modified and ready!")
                 session_name = f"session_{target['name']}_{port}"
                 run_scan(zap, plan_path, session_name)
