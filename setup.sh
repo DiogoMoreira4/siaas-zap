@@ -42,7 +42,6 @@ Type=simple
 User=$(whoami)
 WorkingDirectory=$(pwd)
 ExecStart=/usr/bin/python3 $(pwd)/zap_service.py start --targets-file=$(pwd)/targets.ini
-Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target

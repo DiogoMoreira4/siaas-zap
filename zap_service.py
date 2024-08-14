@@ -84,14 +84,25 @@ def modify_automation_plan(template_with_auth_path, template_without_auth_path, 
             #spider
             dados_yaml['jobs'][2]['parameters']['context'] = target['name']
             dados_yaml['jobs'][2]['parameters']['user'] = target['username']
+            dados_yaml['jobs'][2]['parameters']['maxDuration'] = automationConfigs['spider_max_duration']
+            dados_yaml['jobs'][2]['parameters']['maxDepth'] = automationConfigs['spider_max_depth']
+            dados_yaml['jobs'][2]['parameters']['maxChildren'] = automationConfigs['spider_max_children']
             #spiderAjax
             dados_yaml['jobs'][3]['parameters']['context'] = target['name']
             dados_yaml['jobs'][3]['parameters']['user'] = target['username']
+            dados_yaml['jobs'][3]['parameters']['maxDuration'] = automationConfigs['ajax_spider_max_duration']
+            dados_yaml['jobs'][3]['parameters']['maxCrawlDepth'] = automationConfigs['ajax_spider_max_depth']
+            dados_yaml['jobs'][3]['parameters']['numberOfBrowsers'] = automationConfigs['ajax_spider_number_of_browsers']
             #delay
             #passiveScan-wait
             #activeScan
             dados_yaml['jobs'][6]['parameters']['context'] = target['name']
             dados_yaml['jobs'][6]['parameters']['user'] = target['username']
+            dados_yaml['jobs'][6]['parameters']['maxRuleDurationInMins'] = automationConfigs['active_scan_max_rule_duration']
+            dados_yaml['jobs'][6]['parameters']['maxScanDurationInMins'] = automationConfigs['active_scan_max_scan_duration']
+            dados_yaml['jobs'][6]['parameters']['maxAlertsPerRule'] = automationConfigs['active_scan_max_alerts_per_rule']
+            dados_yaml['jobs'][6]['policyDefinition']['defaultStrength'] = automationConfigs['active_scan_default_strength']
+            dados_yaml['jobs'][6]['policyDefinition']['defaultThreshold'] = automationConfigs['active_scan_default_threshold']
             #report
             dados_yaml['jobs'][7]['parameters']['reportFile'] = target['name']
             dados_yaml['jobs'][7]['parameters']['reportDir'] =  SIAAS_ZAP_DIR+"/reports"  
@@ -105,11 +116,22 @@ def modify_automation_plan(template_with_auth_path, template_without_auth_path, 
         if 'jobs' in dados_yaml:
             #spider
             dados_yaml['jobs'][1]['parameters']['context'] = target['name']
+            dados_yaml['jobs'][1]['parameters']['maxDuration'] = automationConfigs['spider_max_duration']
+            dados_yaml['jobs'][1]['parameters']['maxDepth'] = automationConfigs['spider_max_depth']
+            dados_yaml['jobs'][1]['parameters']['maxChildren'] = automationConfigs['spider_max_children']
             #spiderAjax
             dados_yaml['jobs'][2]['parameters']['context'] = target['name']
+            dados_yaml['jobs'][2]['parameters']['maxDuration'] = automationConfigs['ajax_spider_max_duration']
+            dados_yaml['jobs'][2]['parameters']['maxCrawlDepth'] = automationConfigs['ajax_spider_max_depth']
+            dados_yaml['jobs'][2]['parameters']['numberOfBrowsers'] = automationConfigs['ajax_spider_number_of_browsers']
             #passiveScan-wait
             #activeScan
             dados_yaml['jobs'][4]['parameters']['context'] = target['name']
+            dados_yaml['jobs'][4]['parameters']['maxRuleDurationInMins'] = automationConfigs['active_scan_max_rule_duration']
+            dados_yaml['jobs'][4]['parameters']['maxScanDurationInMins'] = automationConfigs['active_scan_max_scan_duration']
+            dados_yaml['jobs'][4]['parameters']['maxAlertsPerRule'] = automationConfigs['active_scan_max_alerts_per_rule']
+            dados_yaml['jobs'][4]['policyDefinition']['defaultStrength'] = automationConfigs['active_scan_default_strength']
+            dados_yaml['jobs'][4]['policyDefinition']['defaultThreshold'] = automationConfigs['active_scan_default_threshold']
             #report
             dados_yaml['jobs'][5]['parameters']['reportFile'] = target['name'] + "_without_auth"  
             dados_yaml['jobs'][5]['parameters']['reportDir'] =  SIAAS_ZAP_DIR+"/reports"  
@@ -165,22 +187,30 @@ def collect_results(zap, context_name):
 
 class ZAPManager:
     def __init__(self, targets_file):
-        config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'conf', 'config.ini')
-        self.targets_file = targets_file
-        self.base_dir = SIAAS_ZAP_DIR+"/instances/instance"
-        self.api_uri = read_config(config_file, 'APIConfig', 'api_uri')
-        self.api_user = read_config(config_file, 'APIConfig', 'api_user')
-        self.api_password = read_config(config_file, 'APIConfig', 'api_pwd')
-        self.api_ssl_ignore = read_config(config_file, 'APIConfig', 'api_ssl_ignore_verify')
-        self.api_ssl_ca_bundle = read_config(config_file, 'APIConfig', 'api_ssl_ca_bundle')
-        self.targets = read_targets(targets_file)
-        self.zap_instances = {}
-        self.current_target = None
-        self.pid_file = "/tmp/zap_manager.pid"
-        self.zap_config = siaas_aux.get_request_to_server("https://127.0.0.1/api/siaas-server/siaas-zap/config", ignore_ssl=True, ca_bundle=self.api_ssl_ca_bundle, api_user=self.api_user, api_pwd=self.api_password)
-        self._create_pid_file()
-        
-        print(self.api_uri, self.api_user, self.api_password)
+        try:
+            config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'conf', 'config.ini')
+            self.targets_file = targets_file
+            self.base_dir = os.path.join(SIAAS_ZAP_DIR, "instances", "instance")
+            self.api_uri = read_config(config_file, 'APIConfig', 'api_uri')
+            self.api_user = read_config(config_file, 'APIConfig', 'api_user')
+            self.api_password = read_config(config_file, 'APIConfig', 'api_pwd')
+            self.api_ssl_ignore = read_config(config_file, 'APIConfig', 'api_ssl_ignore_verify')
+            self.api_ssl_ca_bundle = read_config(config_file, 'APIConfig', 'api_ssl_ca_bundle')
+            self.targets = read_targets(targets_file)
+            self.zap_instances = {}
+            self.current_target = None
+            self.pid_file = "/tmp/zap_manager.pid"
+            self.zap_config = siaas_aux.get_request_to_server(
+                "https://127.0.0.1/api/siaas-server/siaas-zap/config",
+                ignore_ssl=True,
+                ca_bundle=self.api_ssl_ca_bundle,
+                api_user=self.api_user,
+                api_pwd=self.api_password
+            )
+            self._create_pid_file()
+        except Exception as e:
+            logging.error(f"Error during initialization: {str(e)}")
+            raise
 
     def _create_pid_file(self):
         try:
@@ -188,13 +218,20 @@ class ZAPManager:
                 f.write(str(os.getpid()))
         except PermissionError:
             alternate_pid_file = os.path.expanduser('~/zap_manager.pid')
-            with open(alternate_pid_file, 'w') as f:
-                f.write(str(os.getpid()))
-            self.pid_file = alternate_pid_file
+            try:
+                with open(alternate_pid_file, 'w') as f:
+                    f.write(str(os.getpid()))
+                self.pid_file = alternate_pid_file
+            except Exception as e:
+                logging.error(f"Failed to create PID file: {str(e)}")
+                raise
 
     def _remove_pid_file(self):
         if os.path.exists(self.pid_file):
-            os.remove(self.pid_file)
+            try:
+                os.remove(self.pid_file)
+            except Exception as e:
+                logging.error(f"Failed to remove PID file: {str(e)}")
 
     def start_instances(self):
         logging.info(f"Targets to scan: {self.targets}")
@@ -203,48 +240,67 @@ class ZAPManager:
             for idx, target_key in enumerate(target_keys):
                 target = self.targets[target_key]
                 self.current_target = target  # Atualize o alvo atual
-                port = int(self.zap_config['ZAPConfig']['base_port']) + idx
-                directory = f"{self.base_dir}{idx}"
-                process = start_zap_instance(port, self.zap_config['ZAPConfig']['api_key'], directory)
-                self.zap_instances[target['name']] = {"port": port, "directory": directory}
-                logging.info(f"Instance {idx} created to scan {target['name']}")
-          
-                
-                # Start the scan
-                zap = wait_for_zap_start(port, self.zap_config['ZAPConfig']['api_key'])
-                logging.info(f"Connected to the instance {idx}")
-                plan_path = f"{directory}/automation_plan.yaml"
-                pathtoplans = os.path.dirname(os.path.abspath(__file__))
-                modify_automation_plan(f"{pathtoplans}/PlanWithAuth.yaml",f"{pathtoplans}/PlanWithoutAuth.yaml" ,plan_path, target, self.zap_config['AutomationPlansConfig'])
-                logging.info("Automation Plan modified and ready!")
-                session_name = f"session_{target['name']}_{port}"
-                run_scan(zap, plan_path, session_name)
-                
-                while not is_scan_complete(zap):
-                    get_scan_progress(zap, target['name'])
-                    time.sleep(300)  # Aguarde 10 minutos antes de verificar novamente
-                
-                results = collect_results(zap, target['name'])
-                #save_to_mongodb(results, self.db)
-                #siaas_aux.insert_in_mongodb_collection(self.collection, results)
-                siaas_aux.post_request_to_server(f"{self.api_uri}/siaas-server/siaas-zap/results", results, ignore_ssl=True, ca_bundle=self.api_ssl_ca_bundle, api_user=self.api_user, api_pwd=self.api_password)
-                logging.info(f"Enviei um request para a API com os resultados do {target['name']}!!!!!")
-                logging.info(f"Https Request with scan results of {target['name']} sent to the server API!")
-                del self.zap_instances[target['name']]
-                os.kill(process.pid, signal.SIGTERM)
-                logging.info(f"Instance from port {port} stopped!")
-                
-            # Se não houver mais targets, finalize o serviço
+                try:
+                    port = int(self.zap_config['ZAPConfig']['base_port']) + idx
+                    directory = f"{self.base_dir}{idx}"
+                    process = start_zap_instance(port, self.zap_config['ZAPConfig']['api_key'], directory)
+                    self.zap_instances[target['name']] = {"port": port, "directory": directory}
+                    logging.info(f"Instance {idx} created to scan {target['name']}")
+                  
+                    zap = wait_for_zap_start(port, self.zap_config['ZAPConfig']['api_key'])
+                    logging.info(f"Connected to the instance {idx}")
+                    
+                    plan_path = f"{directory}/automation_plan.yaml"
+                    pathtoplans = os.path.dirname(os.path.abspath(__file__))
+                    modify_automation_plan(
+                        f"{pathtoplans}/PlanWithAuth.yaml",
+                        f"{pathtoplans}/PlanWithoutAuth.yaml",
+                        plan_path,
+                        target,
+                        self.zap_config['AutomationPlansConfig']
+                    )
+                    logging.info("Automation Plan modified and ready!")
+                    
+                    session_name = f"session_{target['name']}_{port}"
+                    run_scan(zap, plan_path, session_name)
+                    
+                    while not is_scan_complete(zap):
+                        get_scan_progress(zap, target['name'])
+                        time.sleep(300)  # Aguarde 10 minutos antes de verificar novamente
+                    
+                    results = collect_results(zap, target['name'])
+                    siaas_aux.post_request_to_server(
+                        f"{self.api_uri}/siaas-server/siaas-zap/results",
+                        results,
+                        ignore_ssl=True,
+                        ca_bundle=self.api_ssl_ca_bundle,
+                        api_user=self.api_user,
+                        api_pwd=self.api_password
+                    )
+                    logging.info(f"HTTPS request with scan results of {target['name']} sent to the server API!")
+                except Exception as e:
+                    logging.error(f"Error during scanning {target['name']}: {str(e)}")
+                finally:
+                    if target['name'] in self.zap_instances:
+                        os.kill(process.pid, signal.SIGTERM)
+                        logging.info(f"Instance from port {port} stopped!")
+                        del self.zap_instances[target['name']]
+                    
             logging.info("All targets were scanned. Finishing the service.")
             self.stop_service()
+        except Exception as e:
+            logging.error(f"Unexpected error: {str(e)}")
         finally:
             self._remove_pid_file()
 
     def stop_service(self):
-        with open(self.pid_file, 'r') as f:
-            pid = int(f.read().strip())
-        os.kill(pid, 15)  # Envia o sinal TERM para o processo
-        logging.info("All ZAP instances stopped and results collected")
+        try:
+            with open(self.pid_file, 'r') as f:
+                pid = int(f.read().strip())
+            os.kill(pid, 15)  # Envia o sinal TERM para o processo
+            logging.info("All ZAP instances stopped and results collected.")
+        except Exception as e:
+            logging.error(f"Error while stopping the service: {str(e)}")
 
 
 

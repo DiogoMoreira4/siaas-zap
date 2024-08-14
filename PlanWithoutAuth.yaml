@@ -1,11 +1,11 @@
 ---
 env:
   contexts:
-  - name: "Altoro Mutual"
+  - name: context
     urls:
-    - "http://demo.testfire.net"
+    - "http://exemplo"
     includePaths:
-    - "http://demo.testfire.net.*"
+    - "http://exemplo.*"
     excludePaths: []
     authentication:
       parameters: {}
@@ -32,7 +32,7 @@ jobs:
   name: "passiveScan-config"
   type: "passiveScan-config"
 - parameters:
-    context: "Altoro Mutual"
+    context: context
     user: ""
     url: ""
     maxDuration: 0
@@ -49,7 +49,7 @@ jobs:
   name: "spider"
   type: "spider"
 - parameters:
-    context: "Altoro Mutual"
+    context: context
     user: ""
     url: ""
     maxDuration: 60
@@ -71,7 +71,7 @@ jobs:
   name: "passiveScan-wait"
   type: "passiveScan-wait"
 - parameters:
-    context: "Altoro Mutual"
+    context: context
     user: ""
     policy: ""
     maxRuleDurationInMins: 0
@@ -81,12 +81,12 @@ jobs:
     defaultStrength: "medium"
     defaultThreshold: "medium"
     rules: []
-  name: "activeScan"
+  name: "eScan"
   type: "activeScan"
 - parameters:
     template: "risk-confidence-html"
     theme: "original"
-    reportDir: "/home/vboxuser/zaproxy"
+    reportDir: ""
     reportFile: ""
     reportTitle: "ZAP Scanning Report"
     reportDescription: ""

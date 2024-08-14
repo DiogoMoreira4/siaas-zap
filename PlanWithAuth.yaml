@@ -1,16 +1,16 @@
 ---
 env:
   contexts:
-  - name: "dvwa"
+  - name: context
     urls:
-    - http://10.0.2.4/DVWA
+    - http://exemplo
     includePaths:
-    - http://10.0.2.4/DVWA.*
+    - http://exemplo.*
     excludePaths:
     authentication:
       method: "browser"
       parameters:
-        loginPageUrl: http://10.0.2.4/DVWA/login.php
+        loginPageUrl: http://exemplo/login.php
         loginPageWait: 5
         browserId: "firefox-headless"
       verification:
@@ -30,7 +30,7 @@ env:
     - name: admin
       credentials:
         password: password
-        username: admin
+        username: user
   parameters:
     failOnError: true
     failOnWarning: false
@@ -45,9 +45,9 @@ jobs:
   name: "passiveScan-config"
   type: "passiveScan-config"
 - parameters:
-    user: "admin"
+    user: user
   requests:
-  - url: http://10.0.2.4/DVWA/index.php
+  - url: http://exemplo/index.php
     name: ""
     method: ""
     httpVersion: ""
@@ -56,8 +56,8 @@ jobs:
   name: "requestor"
   type: "requestor"
 - parameters:
-    context: "dvwa"
-    user: admin
+    context: context
+    user: user
     url: ""
     maxDuration: 10
     maxDepth: 0
@@ -87,8 +87,8 @@ jobs:
     name: "At least 100 URLs found"
     type: "stats"
 - parameters:
-    context: "dvwa"
-    user: admin
+    context: context
+    user: user
     url: ""
     maxDuration: 120
     maxCrawlDepth: 10
@@ -115,8 +115,8 @@ jobs:
   name: "passiveScan-wait"
   type: "passiveScan-wait"
 - parameters:
-    context: "dvwa"
-    user: admin
+    context: context
+    user: user
     policy: ""
     maxRuleDurationInMins: 10
     maxScanDurationInMins: 
@@ -130,7 +130,7 @@ jobs:
 - parameters:
     template: "risk-confidence-html"
     theme: "original"
-    reportDir: "/home/vboxuser/zaproxy"
+    reportDir: ""
     reportFile: "dvwa-AuthTesterContext"
     reportTitle: "ZAP Scanning Report"
     reportDescription: ""
