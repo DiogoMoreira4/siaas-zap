@@ -53,7 +53,7 @@ def start_zap_instance(port, api_key, directory):
         # Set ownership and permissions
         shutil.chown(directory, user=USER, group=USER)
         os.chmod(directory, 0o755)
-    command = f"{HOME_DIR}/zaproxy/ZAP_2.15.0/zap.sh -daemon -port {port} -dir {directory} -config api.key={api_key}"
+    command = f"{HOME_DIR}/zaproxy/ZAP_2.15.0/zap.sh -daemon -addoninstallall -port {port} -dir {directory} -config api.key={api_key}"
     process = subprocess.Popen(command.split())
     return process
 
