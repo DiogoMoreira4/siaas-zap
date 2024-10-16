@@ -1,30 +1,39 @@
-siaas-zap
+# siaas-zap
 
-Plataforma Inteligente Inteligente para a Automação da Deteção de Vulnerabilidades em Aplicações Web
+## Plataforma Inteligente Inteligente para a Automação da Deteção de Vulnerabilidades em Aplicações Web
 
-ESte trabalho surgiu no contexto de uma dissertação de Informática e Gestão no ISCTE
+Este trabalho surgiu no contexto da elaboração de uma dissertação do Mestrado de Informática e Gestão (MIG) no ISCTE.
 
-Trabalho realizado por Diogo Moreira, supervisionado pelos Professores Doutores José Corredoura Serrão e João Pedro Calado Barradas Branco Pavia
+Trabalho realizado por Diogo Moreira, supervisionado pelos Professores Doutores Carlos José Corredoura Serrão e João Pedro Calado Barradas Branco Pavia.
 
-Intruções (testado no Ubuntu 20.04 "Focal" e Ubuntu 22.04 "Jammy")
+### Instruções (testado no Ubuntu 20.04 "Focal" e Ubuntu 22.04 "Jammy"):
 
-Instalação:
+### Instalação:
 - Clonar o repositório: https://github.com/DiogoMoreira4/siaas-zap.git;
 - Abrir uma linha de comandos na raiz da pasta "siaas-zap";
 - Executar o comando "sudo ./setup.sh";
 - Executar novamente o script "setup.sh", mas desta vez sem os privilégios root. Comando: "./setup.sh";
 
+
+### Utilização:
 Depois da instalação, podemos verificar que existe um ficheiro targets.ini vazio dentro da pasta "siaas-zap".
-Este ficheiro deve ser preenchido com os alvos a analisar seguindo a estrutura indicada de seguida:
+Este ficheiro deve ser preenchido com os alvos a analisar, seguindo a estrutura indicada abaixo:
 
 --------------------------------------------------------------------------------
+
 [AppName]
-name:AppName (obrigatório)
-url:url da aplicação (obrigatório)
-username:(obrigatório no caso de querer realizar um scan com autenticação)  
-password:(obrigatório no caso de querer realizar um scan com autenticação)
-loginpage:(obrigatório no caso de querer realizar um scan com autenticação)
---------------------------------------------------------------------------------
+
+name: AppName (obrigatório)
+
+url: url da aplicação (obrigatório)
+
+username: (obrigatório no caso de querer realizar um scan com autenticação)
+
+password: (obrigatório no caso de querer realizar um scan com autenticação)
+
+loginpage: (obrigatório no caso de querer realizar um scan com autenticação)
+
+---------------------------------------------------------------------------------
 
 Depois de preencher o ficheiro com os targets a analisar é só correr o segunite comando:
 - sudo systemctl start zap_manager
