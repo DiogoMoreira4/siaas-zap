@@ -43,3 +43,5 @@ Se for necessário parar a anlaise, podemos recorrer ao seguinte comando:
 
 Quanto aos logs do sistema, cada instancia do ZAP criada irá possuir os seus próprios registos e ficarão armazenados na pasta siaas-zap/instances/instanceX;
 Para além dos logs de cada instancia, existirá um ficheiro zap_manager.log na pasta siaas-zap que permite ao utilizador visualizar qual o alvo que está a ser analisado e qual o progresso da análise.
+
+#### Nota: Este módulo precisa do módulo siaas-server a correr simultaneamente, pois é no módulo siaas-server que se encontram as configurações para correr o ZAP e também onde ficarão armazenados os dados das análises efetuadas.
