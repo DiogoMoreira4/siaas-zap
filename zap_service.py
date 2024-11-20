@@ -304,7 +304,7 @@ class ZAPManager:
         try:
             with open(self.pid_file, 'r') as f:
                 pid = int(f.read().strip())
-            os.kill(pid, 15)  # Envia o sinal TERM para o processo
+            os.kill(pid, 15)  
             logging.info("All ZAP instances stopped and results collected.")
         except Exception as e:
             logging.error(f"Error while stopping the service: {str(e)}")
@@ -326,7 +326,7 @@ def start(targets_file):
 def stop():
     with open('/tmp/zap_manager.pid', 'r') as f:
         pid = int(f.read().strip())
-    os.kill(pid, 15)  # Envia o sinal TERM para o processo
+    os.kill(pid, 15) 
     logging.info("All ZAP instances stopped and results collected")
 
 
