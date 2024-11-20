@@ -6,3 +6,4 @@ scapy==2.5.0
 testresources==2.0.0
 zaproxy==0.3.1
 pymongo==3.10.1
+PyYAML==5.3
