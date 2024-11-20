@@ -287,11 +287,11 @@ class ZAPManager:
                         del self.zap_instances[target['name']]
 
                     if os.path.exists(directory):
-                    try:
-                        shutil.rmtree(directory)
-                        logging.info(f"Session data for instance {idx} ({target['name']}) removed successfully.")
-                    except Exception as e:
-                        logging.error(f"Failed to remove session data for instance {idx}: {str(e)}", exc_info=True)
+                        try:
+                            shutil.rmtree(directory)
+                            logging.info(f"Session data for instance {idx} ({target['name']}) removed successfully.")
+                        except Exception as e:
+                            logging.error(f"Failed to remove session data for instance {idx}: {str(e)}", exc_info=True)
                     
             logging.info("All targets were scanned. Finishing the service.")
             self.stop_service()
