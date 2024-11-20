@@ -4,6 +4,17 @@
 sudo apt-get update
 sudo apt-get install -y python3 python3-pip openjdk-17-jdk
 
+echo "Setting up Python virtual environment..."
+VENV_DIR="venv_zap"
+if [ ! -d "$VENV_DIR" ]; then
+    python3 -m venv "$VENV_DIR"
+    echo "Virtual environment created at $(pwd)/$VENV_DIR"
+else
+    echo "Virtual environment already exists at $(pwd)/$VENV_DIR"
+fi
+
+source "$VENV_DIR/bin/activate"
+
 #Instalar o ZAP
 INSTALL_ZAP_SCRIPT="./zap_installation.sh"
 
@@ -41,13 +52,13 @@ After=network.target
 Type=simple
 User=$(whoami)
 WorkingDirectory=$(pwd)
-ExecStart=/usr/bin/python3 $(pwd)/zap_service.py start --targets-file=$(pwd)/targets.ini
+ExecStart=$(pwd)/$VENV_DIR/bin/python3 $(pwd)/zap_service.py start --targets-file=$(pwd)/targets.ini
 
 [Install]
 WantedBy=multi-user.target
 EOL
 
-# Recargar o systemd e iniciar o serviço
+# Recargar o systemd
 sudo systemctl daemon-reload
 
 echo "Setup completed successfully."
