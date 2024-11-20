@@ -239,7 +239,7 @@ class ZAPManager:
             target_keys = list(self.targets.keys())
             for idx, target_key in enumerate(target_keys):
                 target = self.targets[target_key]
-                self.current_target = target  # Atualize o alvo atual
+                self.current_target = target  
                 try:
                     port = int(self.zap_config['ZAPConfig']['base_port']) + idx
                     directory = f"{self.base_dir}{idx}"
@@ -266,7 +266,7 @@ class ZAPManager:
                     
                     while not is_scan_complete(zap):
                         get_scan_progress(zap, target['name'])
-                        time.sleep(300)  # Aguarde 10 minutos antes de verificar novamente
+                        time.sleep(300)  
                     
                     results = collect_results(zap, target['name'])
                     siaas_aux.post_request_to_server(
@@ -285,6 +285,13 @@ class ZAPManager:
                         os.kill(process.pid, signal.SIGTERM)
                         logging.info(f"Instance from port {port} stopped!")
                         del self.zap_instances[target['name']]
+
+                    if os.path.exists(directory):
+                    try:
+                        shutil.rmtree(directory)
+                        logging.info(f"Session data for instance {idx} ({target['name']}) removed successfully.")
+                    except Exception as e:
+                        logging.error(f"Failed to remove session data for instance {idx}: {str(e)}", exc_info=True)
                     
             logging.info("All targets were scanned. Finishing the service.")
             self.stop_service()
